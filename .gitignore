@@ -1,0 +1,15 @@
+# Build folders
+build/
+cmake-cache/
+
+# Binary files
+*.o
+*.so
+*.a
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+
+# Logs
+*.log

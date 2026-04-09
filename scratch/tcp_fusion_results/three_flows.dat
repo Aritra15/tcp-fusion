@@ -1,0 +1,7 @@
+# variant flow1 flow2 flow3
+TcpFusion 40.9250 32.0512 26.2206
+TcpNewReno 40.5022 29.8318 28.8628
+TcpCubic 59.8158 21.8824 17.6208
+TcpBic 43.2212 38.1314 17.8442
+TcpHighSpeed 41.8514 31.6576 25.6878
+TcpWestwoodPlus 35.4156 28.4074 31.8706

@@ -1,0 +1,168 @@
+nohup: ignoring input
+Pre-building ns-3...
+Total simulation runs: 69
+Sim time per run: 15s (cwnd: 60s)
+
+======================================================================
+EXPERIMENT 1: Single flow throughput vs loss rate
+======================================================================
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpFusion --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion loss=1e-06  thr=96.68 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpFusion --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion loss=1e-05  thr=96.68 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpFusion --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion loss=1e-04  thr=96.62 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpFusion --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion loss=1e-03  thr=68.10 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpFusion --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion loss=1e-02  thr=10.01 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpFusion --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion loss=1e-01  thr=0.49 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpNewReno --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpNewReno loss=1e-06  thr=96.68 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpNewReno --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpNewReno loss=1e-05  thr=96.68 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpNewReno --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpNewReno loss=1e-04  thr=39.75 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpNewReno --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpNewReno loss=1e-03  thr=9.39 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpNewReno --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpNewReno loss=1e-02  thr=1.75 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpNewReno --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpNewReno loss=1e-01  thr=0.39 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpCubic --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic loss=1e-06  thr=97.45 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpCubic --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic loss=1e-05  thr=97.45 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpCubic --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic loss=1e-04  thr=63.72 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpCubic --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic loss=1e-03  thr=12.87 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpCubic --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic loss=1e-02  thr=2.81 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpCubic --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic loss=1e-01  thr=2.82 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpBic --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic loss=1e-06  thr=96.68 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpBic --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic loss=1e-05  thr=96.68 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpBic --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic loss=1e-04  thr=96.67 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpBic --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic loss=1e-03  thr=41.14 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpBic --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic loss=1e-02  thr=5.11 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpBic --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic loss=1e-01  thr=0.47 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpHighSpeed --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed loss=1e-06  thr=96.68 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpHighSpeed --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed loss=1e-05  thr=96.68 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpHighSpeed --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed loss=1e-04  thr=86.19 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpHighSpeed --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed loss=1e-03  thr=18.98 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpHighSpeed --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed loss=1e-02  thr=3.35 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpHighSpeed --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed loss=1e-01  thr=0.59 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpWestwoodPlus --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus loss=1e-06  thr=61.01 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpWestwoodPlus --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus loss=1e-05  thr=60.65 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpWestwoodPlus --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus loss=1e-04  thr=64.13 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpWestwoodPlus --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus loss=1e-03  thr=39.59 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpWestwoodPlus --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus loss=1e-02  thr=36.37 Mbps
+  >> ./ns3 run "tcp-fusion-single-flow --tcpVariant=ns3::TcpWestwoodPlus --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus loss=1e-01  thr=0.84 Mbps
+
+======================================================================
+EXPERIMENT 2 (fig5): Two coexisting flows
+======================================================================
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpFusion --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion+Reno loss=1e-06  var=51.04  reno=46.11
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpFusion --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion+Reno loss=1e-05  var=51.04  reno=46.11
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpFusion --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion+Reno loss=1e-04  var=66.64  reno=28.44
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpFusion --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion+Reno loss=1e-03  var=50.06  reno=8.98
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpFusion --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion+Reno loss=1e-02  var=10.92  reno=2.27
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpFusion --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpFusion+Reno loss=1e-01  var=0.00  reno=0.19
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpWestwoodPlus --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus+Reno loss=1e-06  var=23.14  reno=73.97
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpWestwoodPlus --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus+Reno loss=1e-05  var=23.14  reno=73.97
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpWestwoodPlus --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus+Reno loss=1e-04  var=34.37  reno=48.09
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpWestwoodPlus --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus+Reno loss=1e-03  var=42.73  reno=9.14
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpWestwoodPlus --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus+Reno loss=1e-02  var=30.04  reno=2.23
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpWestwoodPlus --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpWestwoodPlus+Reno loss=1e-01  var=0.00  reno=0.19
+
+======================================================================
+EXPERIMENT 2 (fig6): Two coexisting flows
+======================================================================
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpHighSpeed --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed+Reno loss=1e-06  var=62.96  reno=34.20
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpHighSpeed --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed+Reno loss=1e-05  var=62.96  reno=34.20
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpHighSpeed --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed+Reno loss=1e-04  var=68.50  reno=28.64
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpHighSpeed --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed+Reno loss=1e-03  var=14.55  reno=8.20
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpHighSpeed --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed+Reno loss=1e-02  var=4.09  reno=2.52
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpHighSpeed --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpHighSpeed+Reno loss=1e-01  var=0.00  reno=0.19
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpBic --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic+Reno loss=1e-06  var=74.72  reno=22.44
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpBic --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic+Reno loss=1e-05  var=74.72  reno=22.44
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpBic --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic+Reno loss=1e-04  var=79.52  reno=17.63
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpBic --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic+Reno loss=1e-03  var=22.79  reno=9.42
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpBic --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic+Reno loss=1e-02  var=6.84  reno=2.36
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpBic --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpBic+Reno loss=1e-01  var=0.00  reno=0.19
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpCubic --lossRate=1e-06 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic+Reno loss=1e-06  var=88.26  reno=9.35
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpCubic --lossRate=1e-05 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic+Reno loss=1e-05  var=88.26  reno=9.35
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpCubic --lossRate=0.0001 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic+Reno loss=1e-04  var=69.36  reno=20.02
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpCubic --lossRate=0.001 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic+Reno loss=1e-03  var=22.50  reno=4.77
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpCubic --lossRate=0.01 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic+Reno loss=1e-02  var=3.87  reno=1.46
+  >> ./ns3 run "tcp-fusion-two-flows --tcpVariant=ns3::TcpCubic --lossRate=0.1 --simTime=15 --segmentSize=1448" --no-build
+    TcpCubic+Reno loss=1e-01  var=0.00  reno=0.19
+
+======================================================================
+EXPERIMENT 3: Congestion window behaviour
+======================================================================
+  >> ./ns3 run "tcp-fusion-cwnd --tcpVariant=ns3::TcpFusion --simTime=60 --lossRate=1e-5 --outPrefix=cwnd_TcpFusion --outDir=/media/aritra/New Volume/CSE 3.2/CSE 322/ns-allinone-3.39/ns-3.39/scratch/tcp_fusion_results" --no-build
+    Generated cwnd traces for TcpFusion
+  >> ./ns3 run "tcp-fusion-cwnd --tcpVariant=ns3::TcpCubic --simTime=60 --lossRate=1e-5 --outPrefix=cwnd_TcpCubic --outDir=/media/aritra/New Volume/CSE 3.2/CSE 322/ns-allinone-3.39/ns-3.39/scratch/tcp_fusion_results" --no-build
+    Generated cwnd traces for TcpCubic
+  >> ./ns3 run "tcp-fusion-cwnd --tcpVariant=ns3::TcpNewReno --simTime=60 --lossRate=1e-5 --outPrefix=cwnd_TcpNewReno --outDir=/media/aritra/New Volume/CSE 3.2/CSE 322/ns-allinone-3.39/ns-3.39/scratch/tcp_fusion_results" --no-build
+    Generated cwnd traces for TcpNewReno
+
+======================================================================
+GENERATING PLOTS
+======================================================================
+  !! matplotlib not found. Raw data saved in /media/aritra/New Volume/CSE 3.2/CSE 322/ns-allinone-3.39/ns-3.39/scratch/tcp_fusion_results
+
+======================================================================
+ALL EXPERIMENTS COMPLETE
+Results and plots in: /media/aritra/New Volume/CSE 3.2/CSE 322/ns-allinone-3.39/ns-3.39/scratch/tcp_fusion_results
+======================================================================

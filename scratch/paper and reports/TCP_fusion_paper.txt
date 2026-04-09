@@ -1,0 +1,669 @@
+                                                                                                                                     31
+
+
+
+
+          TCP-Fusion: A Hybrid Congestion Control
+            Algorithm for High-speed Networks
+                             Kazumi KANEKO, Tomoki FUJIKAWA, Zhou SU and Jiro KATTO
+                                 Graduate School of Science and Engineering, Waseda University
+                                      3-4-1 Okubo, Shinjyuku-ku, Tokyo, 169-8555 Japan
+                                     E-mail: {kaneko, katto}@katto.comm.waseda.ac.jp
+                                                                        avoidance phase to quickly increase and slowly decrease the
+   Abstract— This paper presents a new congestion control               congestion window than TCP-Reno, to achieve high throughput
+algorithm of TCP, called TCP-Fusion, and provides its extensive         in high-speed networks. This approach is called a loss-based
+evaluation results through simulations and implementations.             protocol, which adjusts its congestion window size by causing
+Recently, towards high-speed networks with large bandwidth
+delay product, a number of different approaches have been               packet losses intentionally. Examples are High-speed TCP
+proposed to improve TCP performance. However, their potential           (HSTCP, for short) [3], Scalable TCP [4], early version of
+unfriendliness to TCP-Reno encumbers their wide deployment in           TCP-Westwood (TCPW) [5, 6], BIC [14] and CUBIC [16]. In
+the Internet because TCP-Reno is already widely deployed. Most          contrast to these loss-based protocols, as the second category, a
+recently, to satisfy efficiency and friendliness tradeoffs of TCP,      delay-based protocol makes use of the RTT as a network
+new approaches combining a loss-based protocol and a
+                                                                        congestion estimator and can achieve excellent steady state
+delay-based protocol have been proposed, such as TCP-Adaptive
+Reno and Compound TCP. Our TCP-Fusion also belongs to this              performance. Examples are TCP-Vegas [7] and FAST TCP [8].
+category and tries to utilize the residual capacity effectively         These advanced protocols promise to improve the TCP
+without impacts on coexisting flows, i.e. TCP-Reno flows. To            performance significantly in high-speed networks. As many
+achieve this purpose, TCP-Fusion exploits three useful                  researchers were pointing out, however, their potential
+characteristics of TCP-Reno, TCP-Vegas and TCP-Westwood in              unfriendliness to TCP-Reno stands in the way of their wide
+its congestion avoidance strategy. In short, congestion window of
+                                                                        deployment. Since TCP-Reno is already widely used, not only
+TCP-Fusion is decreased without causing too drastic reduction
+and is increased with smart adaptability to coexisting TCP-Reno         improving TCP performance but also friendliness to TCP-Reno
+flows according to the congestion level measurement estimated           is one of the most important issues in designing a new protocol.
+from RTT. Our implementation and simulation results show that           Recently, to manage efficiency and friendliness tradeoffs above,
+TCP-Fusion can obtain the highest throughput among existing             as the third category, loss-based protocols using RTT metrics
+TCP variants when there is unused residual capacity while its           have been proposed, e.g., Gentle high-speed TCP [11],
+friendliness to the TCP-Reno is sufficiently satisfied, otherwise, it
+                                                                        TCP-Africa [12], TCP-Adaptive Reno (ARENO) [9] and
+shares the same bandwidth to coexisting flows.
+                                                                        Compound TCP (CTCP) [13]. They can adaptively switch their
+                                                                        congestion control mode or TCP response function according to
+                        I. INTRODUCTION                                 the congestion level measurement estimated from RTT.
+                                                                           In this paper, we propose a new hybrid congestion control
+T    CP (Transmission Control Protocol) is widely used in
+     current network, provides end-to-end, reliable congestion
+control. The majority of data services including FTP and HTTP
+                                                                        algorithm of TCP. This new protocol, called TCP-Fusion,
+                                                                        makes use of three useful characteristics of TCP-Reno,
+in the Internet are carried by TCP. Recently, while the amount          TCP-Vegas and TCPW, and also belongs to the loss-based
+of Internet traffic is explosively increasing with the rapid            protocol using RTT metric category mentioned above. The key
+growth of Internet users, the Internet is evolving to high-speed        concept is similar to the existing ones, whose congestion
+networks with large bandwidth delay product (BDP). However              window sizes are increased aggressively whenever the network
+it is well known that current TCP (mostly TCP-Reno [1] and              is estimated underutilized. When the network is fully utilized,
+TCP-NewReno [2]) throughput deteriorates in such high-speed             they perform similarly to the TCP-Reno’s manner. Our
+networks. This is believed to be primary due to the congestion          proposal, by modifying these characteristics to be a scalable
+control algorithm of TCP-Reno, whose congestion window size             manner, can adjust its congestion window according to the left
+is increased by 1MSS/RTT and halved upon packet losses                  unused capacity, and provides a good balance among high
+regardless of network condition. That is to say, its window             efficiency and friendliness to TCP-Reno. Our implementation
+control mechanism is too conservative in increase and drastic in        and simulation evaluations including other TCP variants show
+decrease for high-speed networks, respectively.                         the effectiveness of TCP-Fusion.
+   To overcome this issue, a number of different approaches                This paper is organized as follows. In section Ⅱ, we describe
+have been proposed. These approaches can be classified into             the TCP-Fusion algorithm. Section Ⅲ                provides the
+three categories. One modifies an AIMD (Additive Increase               implementation and simulation results. Finally we conclude
+Multiplicative Decrease) mechanism of TCP congestion                    this paper.
+                                                                                                                                                 32
+
+                   II. TCP-FUSION PROTOCOL                                where cwndnew, cwndlast and reno_cwnd are the congestion
+   TCP-Fusion maintains two congestion window sizes. The                  window sizes after and before update and of an equivalent to
+one has two properties of TCP-Vegas and TCPW, which                       TCP-Reno, respectively. α is the lower bound threshold to
+provide efficiency in large leaky pipe, i.e., the link with large         switch three phases. Winc is the increment parameter to increase
+bandwidth-delay product and non-negligible random losses.                 congestion window size rapidly. With regard to α and Winc, we
+The other one is updated like TCP-Reno, i.e., the value is                will discuss in detail in the next subsection.
+increased by 1MSS/RTT and halved upon packet losses, and                    C. Setting Parameters
+then TCP-Fusion adopts either big one as its new congestion                 Setting the threshold parameter α has a big impact on the
+window size. Therefore, TCP-Fusion ensures at least                       performance of our proposal. We first consider next two
+TCP-Reno performance.                                                     requirements for the parameter setting:
+  A. Congestion Window Reduction                                             1) Considering friendliness to TCP-Reno, it should be a
+   TCP-Fusion adopts optimization of the decrease parameter               small value to minimize the queuing delay that affects
+based on TCPW-RE (Rate Estimation) [6] to improve                         coexisting TCP-Reno flow. However, if α is too small
+efficiency particularly in the leaky pipe. In TCPW-RE, the                compared to the link bandwidth, it becomes meaningless due to
+decrease parameter after a loss can be expressed as RTTmin/RTT            TCP timer granularity (diff is always larger than α except the
+[10], where RTTmin and RTT are the minimum RTT and the RTT                case of RTT=RTTmin). As a result, three phases of TCP-Fusion
+right before the packet loss, respectively. This equation                 cannot be switched adequately. Therefore α should be
+indicates that TCPW-RE reduces its congestion window size to              proportional to the link bandwidth.
+clear the buffer and, as a result, it is friendly to TCP-Reno only           2) When there are coexisting N TCP-Fusion flows, since
+if the buffer capacity is equal to the BDP [10, 17] where RTT             each flow will try to put α packets into the bottleneck buffer, the
+grows up to 2*RTTmin. If the buffer capacity is larger than the           router buffer size has to accommodate at least N*α packets. If
+BDP, the decrease value is less than 1/2 upon a congestion loss           the router buffer size is less than the value, the parameter diff
+(Fig, 1) and TCPW-RE cannot obtain a share of the bandwidth.              never goes up to α. This means that all TCP-Fusion flows
+To address this issue, we then set the thresholds to 1/2 as               always increase their congestion window sizes aggressively,
+follows;                                                                  and results in unneeded frequent buffer overflows. Therefore, α
+                         RTTmin               cwnd last                   should be set to a small value according to the number of
+        cwnd new = max(           cwnd last ,           )                 coexisting TCP-Fusion flows.
+                          RTT                    2
+                                                                            To satisfy these requirements mentioned above, we start with
+where cwndnew, and cwndlast are congestion window sizes right
+                                                                          an assumption that no routers have smaller than G packets that
+after and before the packet loss, respectively.
+                                                                          corresponds to the queuing delay Dmin in the bottleneck queue.
+  B. Congestion Window Increase                                           Thus, G is given by
+   Similar to TCP-Vegas, TCP-Fusion has three phases;                                                           B * D min
+increase phase, decrease phase, and steady phase, which are                                           G=
+                                                                                                           8 * packet _ Size
+switched by a number of packets in the bottleneck queue (diff).
+The diff can be estimated as;                                             where B is the bandwidth of bottleneck link. In the worst case
+                                                                          that all coexisting N flows employ TCP-Fusion algorithm, since
+                          ( RTT − RTTmin )
+           diff = cwnd                                                    the total packets (N*α) is equal to G packets, α can be expressed
+                                RTT                                       by G/N. Although it is hard to know the bottleneck link
+   If the diff is less than the lower bound threshold, the link is        bandwidth B and the coexisting number of flows N accurately,
+determined as underutilized, and its congestion window size is
+increased rapidly to fill the pipe size. If the diff is larger than the
+                                                                                 Reduction factor
+
+
+
+
+upper bound threshold, the link is determined as utilized and                                        1
+                                                                                                                          TCP-Fusion
+early congestion, and its congestion window size is decreased
+to the value that has at least the lower bound threshold in the                                     1/2
+                                                                                                               ARENO
+bottleneck queue. Otherwise, the link is determined in a good                                                                  TCP-Westwood
+balance and non-congestion condition, and its congestion                                                                                   RTT
+                                                                                                           RTTmin RTTmax       2*RTTmin
+window size is fixed. Fig. 2 shows the congestion window
+behavior of TCP-Fusion when TCP-Fusion and TCP-Reno are                                     Fig. 1: Reduction factor
+competing with a buffer size less than BDP.                                    Congestion window
+                                                                                 cwnd max
+   cwnd new =                                                                                                         cwnd
+     cwnd last + Winc / cwnd last , if diff < α                           cwnd max
+                                                                                              RTT min
+                                                                                              RTT
+     cwnd last + (− diff + α ) / cwnd last , if diff > 3 * α
+     cwnd , otherwise                                                       cwnd max / 2                         reno_cwnd
+           last
+
+   cwnd new = reno _ cwnd , if cwnd new < reno _ cwnd                                                                               Time
+                                                                                                          Fig. 2: Congestion window behavior
+                                                                                                                                                                  33
+
+                      Sender 1              Receiver 1                        variants; TCP-Fusion, ARENO, CTCP, HSTCP, BIC and
+                 CPU：Pentium4 2.4GHz
+                  Memory: 512Mbyte
+                                       CPU：Pentium4 2.4GHz
+                                        Memory: 512Mbyte
+                                                                              CUBIC. In this paper, we mainly introduce implementation
+                    NIC: 100base-T        NIC: 100base-T                      results inside our laboratory and on an actual network
+                                                                              experiments. We omit a lot of simulation results which support
+                                                                              implementation results in this paper due to page limitation.
+                             Network Emulator                                 Instead, we only show a few simulation results that cannot be
+                                                             Receiver 2
+       Sender 2           Link Bandwidth：100Mbps
+   CPU：Pentium4 3GHz          RTT：40ms-80ms
+                                                        CPU：Athlon XP 3000+   evaluated in our current implementation environments. The
+                                                         Memory: 512Mbyte
+     Memory: 1Gbyte
+     NIC: 100base-T
+                          Buffer capacity：500Kbyte         NIC: 100base-T     parameter β is set to 12Mbps.
+              Fig. 3: Network model in laboratory                               A. Laboratory Experiments
+we can approximate the value B/N by achieved rate estimation                     The network topology is shown in Fig. 3. The bandwidth,
+as follows:                                                                   round-trip propagation delay and buffer size are illustrated in
+          G   ( B / N ) * D min   RE * D min                                  this figure. The 500KB of buffer size is equal to the BDP of
+    α=      =                   ≈                                             setting 40ms RTT. For a traffic source, we use Iperf[19] to
+          N packet _ size * 8 packet _ size * 8
+                                                                              generate continuous TCP data flow.
+where RE is the achieved rate estimation governed by TCPW-
+                                                                                  1) Efficiency and Friendliness in lossy link
+RE (Rate Estimation) scheme. By setting this value, α scales up
+to the link capacity (Requirement 1), and becomes a small value                  Fig. 4 shows the throughput of a single TCP flow. For the
+in inverse proportion to the number of coexisting TCP-Fusion                  network emulator setting, RTT is 40ms and random packet loss
+flows (Requirement 2). Furthermore, since the achieved rate                   rate is varied from 10-1 to 10-6. All kinds of TCP variant flows
+RE is equivalent to cwnd/RTT, α can be expressed by                           can utilize nearly the link bandwidth when the loss rate is
+                                                                              smaller than 10-5 and degrade its throughput as the loss rate
+                    RE * D min            D                                   increases. Among of them, TCP-Fusion is most efficient and
+           α=                       = cwnd min
+                  packet _ size * 8       RTT                                 robust in this lossy link. For example, TCP-Fusion can obtain
+  This equation means that accuracy of the parameter α is                                               100
+                                                                                                                                          TCP-Fusion
+limited by the TCP timer granularity (tcp_tick) of which value                                                                              ARENO
+                                                                                                                                              CTCP
+depends on operating system. We can set Dmin= tcp_tick or                                                80
+                                                                                                                                             HSTCP
+                                                                                    Throughput [Mbps]
+
+
+
+
+higher value to absorb slight oscillations of the RTTs in                                                60
+                                                                                                                                                BIC
+                                                                                                                                             CUBIC
+dynamic network conditions. In this paper, while our                                                                                       TCP-Reno
+simulation experiments showed that Dmin=tcp_tick is                                                      40
+controllable enough, we set it to 4ms based on our
+                                                                                                         20
+implementation experiments as of now.
+   Secondly, we set Winc according to our assumption that no                                              0
+                                                                                                         10^-6   10^-5      10^-4     10^-3       10^-2   10^-1
+routers have smaller than G packets. In TCP-Fusion, even if its                                                          Ranadom packet loss rate
+                                                                                 Fig. 4: Throughput of a single flow with different loss rate
+congestion window size reaches the BDP, since RTT doesn’t                                           100
+change from RTTmin yet and thus the network is recognized as                                                                             TCP-Fusion
+                                                                                                                                      Reno(+Fusion)
+underutilized, the congestion window size is increased by Winc.                                         80                                  ARENO
+                                                                                                                                     Reno(+ARENO)
+                                                                                    Throughput [Mbps]
+
+
+
+
+Accordingly, if Winc is set to more than G packets, packet losses                                                                             CTCP
+are caused at the time on our assumption. Thus, Winc is upper                                           60                             Reno(+CTCP)
+
+bounded by                                                                                              40
+                                  B * D min
+                  Winc ≤ G =                                                                            20
+                             8 * packet _ size
+where B is the bandwidth estimation achieved by time sequence                                             0
+                                                                                                         10^-6   10^-5      10^-4    10^-3        10^-2   10^-1
+of ACKed sequence numbers like TCPW-BE. By this way, its                                                                 Ranadom packet loss rate
+                                                                                 Fig. 5: Throughput of coexisting two flows with different
+increment parameter can scale up to the link bandwidth. While                         loss rate (the cases of Fusion/ARENO/CTCP)
+we can set Dmin to 4ms as with α mentioned above, our                                                   100
+                                                                                                                                             HSTCP
+simulation experiments show that Dmin=1ms is reasonable value                                                                         Reno(+HSTCP)
+even in high-speed networks. When we assume Dmin=1ms and                                                 80                                     BIC
+                                                                                                                                         Reno(+BIC)
+                                                                                    Throughput [Mbps]
+
+
+
+
+1500B packet size, we have Winc=B/12Mbps.                                                                60
+                                                                                                                                             CUBIC
+                                                                                                                                      Reno(+CUBIC)
+
+                  III. PERFORMANCE EVALUATIONS                                                           40
+
+  We carried out extensive simulations using ns-2 simulator                                              20
+[18] and implementation experiments on a Linux system to
+verify TCP-Fusion properties. In our implementation                                                       0
+                                                                                                         10^-6   10^-5      10^-4     10^-3       10^-2   10^-1
+experiments, we newly implemented TCP-Fusion, ARENO and                                                                  Ranadom packet loss rate
+                                                                                 Fig. 6: Throughput of coexisting two flows with different
+CTCP as Linux modules (Kernel 2.6.15), and tested six TCP                              loss rate (the cases of HSTCP/BIC/CUBIC)
+                                                                                                                                                                      34
+
+   Table 1: Throughput of coexisting two TCP variant flows              ARENO is 44.0Mbps. We can see through this experiment that
+                Reno   Fusion ARENO CTCP HSTCP        BIC CUBIC         TCP variants with high friendliness such as TCP-Fusion,
+     Reno       44.9    40.2   42.4 38.6 10.3         10.4 18.6         ARENO and CTCP have almost the same bandwidth without
+    Fusion      50.0    43.6   46.0 43.0 21.1         11.4 18.7         critical impacts with each other. By contrast, BIC and CUBIC
+    ARENO       40.5    44.0   43.2 38.0 16.5         12.2 19.4         flows deteriorate the other TCP variants and even HSTCP
+     CTCP       53.9    46.5   50.5 44.9 20.8         13.8 15.0         throughput. TCP variants flows coexisting with BIC or CUBIC
+    HSTCP       78.2    61.4   68.2 65.8 43.2         29.9 29.7         flow have no chance to increase its congestion window quickly
+      BIC       81.2    79.0   78.0 76.2 59.7         44.8 45.4         because BIC or CUBIC flow grows its congestion window
+    CUBIC       71.7    70.3   68.4 74.0 59.6         43.9 44.3         regardless of its available capacity.
+
+                                 Route 1                                  B. Actual Network Experiments
+               Link bandwidth: 100Mbps                                     We prepared two actual network lines as shown in Fig. 7;
+            RTT: 2ms 6hops Distance: 80Km
+                                            Network Emulator
+                                                                        Tokyo-Honjyo line (Route 1) and Tokyo-Kitakyushu line
+                                                                        (Route 2). These two lines are the part of backbone networks of
+                                                                        Waseda University. Their link characteristics are illustrated in
+                                                                        this figure. To avoid the influence of unexpected background
+                                                         Receiver       traffic, the throughput presented below is the average of several
+       Sender
+                            Link bandwidth: 30Mbps                      trials.
+                       RTT: 20ms 7hops Distance: 900Km
+                                 Route 2                                    1) Fairness among identical flows in Route 1
+                  Fig. 7: Actual network lines                             We first evaluate the fairness when three identical TCP
+up to 1.4 times of ARENO throughput in Fig. 4. This is because          variant flows are competing. The additional RTT at network
+RTTmax of ARENO, as the loss rate increases, becomes less than          emulator is set to 80ms. No additional packet loss rate is
+2*RTTmin due to reduction of congestion losses. In such cases,          introduced. The first, second and third flows start at 0s, 50s and
+the reduction factor upon a packet loss of ARENO is less than           100s, respectively. Fig. 8 shows the congestion window
+those of TCPW or TCP-Fusion as shown in Fig. 1.                         behavior of each TCP variant case. The results show that all
+                                                                        kinds of TCP variants except HSTCP behave almost fairly.
+   We then evaluate the friendliness in lossy link. In this
+                                                                        HSTCP shows slow convergence with heavy oscillation. Their
+experiment, TCP variants and TCP-Reno flows are competing.
+                                                                        throughputs of the first, second and third flows are 51.07Mbps,
+Fig. 5 and Fig. 6 present the results of TCP-Fusion/ARENO/
+CTCP and HSTCP/BIC/CUBIC, respectively. If the loss rate is                                     1000
+                                                                                                                                                 Flow-1
+                                                                                                                                                 Flow-2
+
+smaller than 10-5, TCP-Reno flow can obtain fair share                                           800                                             Flow-3
+                                                                                                                 TCP-Fusion
+                                                                            Congestion window
+
+
+
+
+                                                                                                 600
+(50Mbps) of the link bandwidth. Therefore, TCP variant flow                                      400
+
+should have the same bandwidth to coexisting TCP-Reno flow                                       200
+
+
+until the loss rate is 10-5, and after that, utilizes the residual                                 0
+                                                                                                1000
+                                                                                                                                                 Flow-1
+
+capacity left unused by the TCP-Reno flow. In Fig. 5, we can                                     800
+                                                                                                                                                 Flow-2
+                                                                                                                                                 Flow-3
+                                                                                                                  HSTCP
+                                                                            Congestion window
+
+
+
+
+see that TCP-Fusion, ARENO and CTCP flows have                                                   600
+
+
+approximately the same bandwidth to the TCP-Reno flow until                                      400
+
+
+
+the loss rate is 10-5. After that, when the loss rate increases, they
+                                                                                                 200
+
+                                                                                                   0
+
+can obtain more than fair share by utilizing the residual capacity.                             1000
+
+                                                                                                800
+                                                                                                                                                 Flow-1
+                                                                                                                                                 Flow-2
+                                                                                                                                                 Flow-3
+
+In this experiment again, TCP-Fusion can obtain the highest                                                      ARENO
+                                                                            Congestion window
+
+
+
+
+                                                                                                600
+
+throughput. On the other hand, HSTCP, BIC and CUBIC                                             400
+
+
+deteriorate coexisting TCP-Reno flow throughput to much less                                    200
+
+
+than fair share when the loss rate is small in Fig. 6.                                             0
+                                                                                                1000 0     100      200           300      400
+                                                                                                                                                 Flow-1
+                                                                                                                                                          00    600
+                                                                                                                                                 Flow-2
+                                                                                                800                                              Flow-3
+                                                                                                                 CTCP
+    2) Friendliness among TCP variants
+                                                                            Congestion window
+
+
+
+
+                                                                                                600
+
+
+   In this experiment, we evaluate the friendliness when two                                    400
+
+
+
+TCP variant flows are competing. Previously, the target for
+                                                                                                200
+
+                                                                                                   0
+
+evaluation of the friendliness is argued only for TCP-Reno.                                     1000
+                                                                                                                                                 Flow-1
+                                                                                                                                                 Flow-2
+                                                                                                                                                 Flow-3
+                                                                                                 800
+However, on the present situation where BIC is implemented in                                                             BIC
+                                                                            Congestion window
+
+
+
+
+                                                                                                 600
+
+Linux by default and CTCP will be implemented in Windows                                         400
+
+
+Vista, we anticipate several TCP variants will be competing in                                   200
+
+
+the future Internet. Accordingly, for TCP variants, the                                            0
+                                                                                                1000
+                                                                                                                                                 Flow-1
+                                                                                                                                                 Flow-2
+friendliness to other TCP variants as well as TCP-Reno                                           800
+                                                                                                                     CUBIC
+                                                                                                                                                 Flow-3
+                                                                            Congestion window
+
+
+
+
+becomes one of the important concerns.                                                           600
+
+                                                                                                 400
+
+  The experimental result is shown in Table 1. This table                                        200
+
+
+means that, for example, when TCP-Fusion and ARENO are                                             0
+                                                                                                       0   100      200           300
+                                                                                                                                Time [s]
+                                                                                                                                           400            500   600
+
+
+competing, TCP-Fusion flow throughput is 46.0Mbps and                                                  Fig. 8: Congestion window behavior;
+                                                                                                   three identical flows are competing in Route 1
+                                                                                                                                                                  35
+
+                                                                                                              1
+                                  12
+    Short-RTT flow/Long-RTT flow
+
+
+
+
+                                                                                                             0.9
+                                           TCP-Fusion
+                                  10                                                                         0.8                                         Fusion
+                                           ARENO                                                                                                         ARENO
+                                                                                                             0.7
+            throughput ratio
+
+
+
+
+                                                                                          Link Utilization
+                                   8       CTCP                                                                                                          CTCP
+                                           HSTCP                                                             0.6
+                                                                                                                                                         HSTCP
+                                   6       BIC                                                               0.5
+                                                                                                                                                         BIC
+                                           CUBIC                                                             0.4                                         CUBIC
+                                   4
+                                           Reno                                                              0.3                                         FAST
+                                   2                                                                         0.2                                         Reno
+                                                                                                             0.1
+                                   0
+                                              1:1              1:3           1:6                             0
+                                                                                                                   100Mbps   300Mbps   600Mbps   1Gbps
+                                                             RTT ratio
+                                           Fig. 9: Throughput ratio of two flows            Fig. 11: Throughput when competing TCP variant and
+                                                 with different RTT in Route 1              TCP-Reno for different link bandwidth (10-5 loss rate)
+
+                                                    TCP variant   TCP-Reno
+                                                                                       loss events or the congestion level estimation based on RTT.
+                                  16
+                                                                                         C. Simulation Experiments
+                                  14
+              Throughput [Mbps]
+
+
+
+
+                                  12                                                      In this subsection, we introduce some simulation results that
+                                  10                                                   cannot be evaluated in our current implementation experiments;
+                                   8                                                   high-speed networks more than 100Mbps and multi-bottleneck
+                                   6                                                   links with/without reverse traffic. In simulation experiments,
+                                   4
+                                                                                       we added FAST to TCP variants team of implementation
+                                   2
+                                   0
+                                                                                       experiments. All results are obtained using ns-2 simulator [18].
+                                       Fusion/ ARENO/ CTCP/ HSTCP/ BIC/ CUBIC/ Reno/
+                                        Reno    Reno  Reno   Reno Reno Reno    Reno        1) Efficiency and Friendliness in high-speed networks
+                                         Fig. 10: Throughput when TCP variant and
+                                           TCP-Reno are competing in Route 2              We evaluate the efficiency and friendliness when TCP-Reno
+                                                                                       and TCP variants flows are competing in high-speed network.
+28.69Mbps and 16.54Mbps, respectively. Likewise, in                                    The network model is a simple dumb-bell topology such as Fig.
+TCP-Fusion, their throughputs are 36.62Mbps, 31.15Mbps and                             3. The bandwidth and the delay of access links are 1Gbps and
+33.45Mbps, respectively.                                                               1ms, respectively. The bandwidth and the delay of bottleneck
+                                                                                       link are 100Mbps, 300Mbps, 600Mbps or 1Gbps and 20ms,
+    2) Fairness with different RTT flows in Route 1
+                                                                                       respectively. The random packet loss rate at bottleneck link is
+   In this experiment, two identical TCP variant flows are                             set to 10-5. The router buffer capacity is set to BDP of each
+competing with different RTT by using the network emulator.                            experiment and the router buffers employ Taildrop discipline.
+One is short-RTT flow with 20ms RTT and the other is
+                                                                                          Fig. 11 shows the utilization ratio of bandwidth share of each
+long-RTT flow with 20ms, 60ms or 120ms RTT. Fig. 9 shows
+                                                                                       flow. In this figure, the throughput in the case with competing
+the throughput ratio of the short-RTT flow to the long-RTT
+                                                                                       two TCP-Reno flows is also shown at rightmost in each case.
+flow. Although the longer RTT flow gets smaller bandwidth as
+                                                                                       The goal in this experiment is coordination with TCP-Reno as
+TCP nature in all TCP variants, especially HSTCP suffers from
+                                                                                       well as link utilization improvement. TCP variant flow should
+unfairness. TCP-Fusion, ARENO and CTCP have almost the
+                                                                                       not get bandwidth in return of the throughput reduction of the
+same ratio as TCP-Reno. This is because their architectures are
+                                                                                       coexisting TCP-Reno flow. TCP-Fusion, ARENO and CTCP
+designed to cause the congestion loss by TCP-Reno like
+                                                                                       perform friendly even in high-speed networks. The utilization
+window control to ensure friendliness to TCP-Reno. For a
+                                                                                       ratio of the coexisting TCP-Reno flow is almost the same ratio
+cyclic behavior of TCP, since its window size just before a
+                                                                                       as those of two TCP-Reno flows competing case. Among of
+congestion loss is one of the determining factors of its flow
+                                                                                       them, TCP-Fusion can also achieve the highest utilization ratio.
+throughput, their RTT fairness are almost same as TCP-Reno.
+                                                                                       HSTCP and BIC get more bandwidth by stunting TCP-Reno
+On the other hand, CUBIC performs most fairly. This is the
+                                                                                       flow. By contrast, FAST cannot get fair share at 100Mbps,
+specific property of CUBIC whose window control uses
+                                                                                       which is too friendly.
+elapsed time since the last congestion event.
+                                                                                           2) Fairness in complex links
+    3) Friendliness in Route 2
+                                                                                          For the last experiments in this paper, we evaluate the
+   For the last actual network experiment, we test the
+                                                                                       fairness in multi-bottleneck links. The network model is the
+friendliness when TCP-Reno and TCP variants are competing
+                                                                                       parking lot topology as shown in Fig. 12. The bandwidth and
+in Route 2 with small BDP. Its BDP is estimated to around 50
+                                                                                       delay of each link are illustrated in this figure. The router buffer
+packets. Note that we could confirm that the single flow of all
+                                                                                       capacity is set to BDP of the longest RTT flow, and the router
+protocols can achieve the link bandwidth, as is not shown in this
+                                                                                       buffers employ Taildrop discipline. In this experiment, there
+paper. Fig. 10 shows the each throughput of all cases. All TCP
+                                                                                       are a total of six flows, three TCP variants and three TCP-Reno,
+variants perform in the same manner, namely share fairly with
+                                                                                       with three different hop counts; S1-S4, S2-S4 and S3-S4, in
+TCP-Reno. In such a low-speed network or small BDP network,
+                                                                                       forward direction. There are also each four TCP-Reno flows on
+TCP variants enter their TCP-Reno mode triggered by the
+                                                                                       the ACK return path; S5-S6, S6-S7 and S7-S8, respectively, to
+congestion window size, the period between two consecutive
+                                                                                                                                                                                                          36
+
+                                      S1                    S2                          S3                       S4               friendliness even in high-speed networks with large bandwidth-
+                                                                                                                                  delay product and non-negligible random packet losses. Our
+                       1Gbps                                                                                                      implementation and simulation results show that TCP-Fusion
+                        1ms                  R1                  R2                           R3                      R4          can achieve the highest throughput in existing protocols.
+                       1Gbps
+                                               300Mbps           300Mbps                         300Mbps                          Moreover, when a TCP-Fusion flow competes with a TCP-
+                                                 10ms              10ms                            10ms                           Reno flow, it can obtain more than fair share when there is
+                        1ms
+                                                                                                                                  unused residual capacity otherwise, it shares the same
+                                     S8          S7           S6              S5                                                  bandwidth to coexisting flows. We also emphasize that the
+                                     Fig. 12: Multi-bottleneck links topology                                                     fairness among TCP-Fusion flows is almost same as that of
+                                                                                                                                  TCP-Reno.
+                                 without reverse traffic                        with reverse traffic
+                      300                                                                                                            As future work, our first job is more investigation to
+                      250                                                                                                         optimally choose a parameter such as Dmin. Moreover, we are
+  Throughput [Mbps]
+
+
+
+
+                                                                                                                       Reno1
+                      200                                                                                              Variant1   planning more extensive implementation experiments over
+                                                                                                                       Reno2      high-speed networks with multi-bottleneck links and more
+                      150                                                                                              Variant2
+                                                                                                                       Reno3      realistic network environment with short-lived flows and
+                      100
+                                                                                                                       Variant3   reverse traffic.
+                       50
+                        0                                                                                                                                  ACKNOWLEDGEMENT
+                                     ARENO
+
+
+
+
+                                                                               ARENO
+                                                    CUBIC
+
+
+
+
+                                                                                                      CUBIC
+                                                                                              HSTCP
+                                                    HSTCP
+
+
+
+                                                            FAST
+
+
+
+
+                                                                                                              FAST
+                                                                      Fusion
+                            Fusion
+
+
+
+
+                                                                                                        BIC
+                                                      BIC
+
+
+
+
+                                                                                       CTCP
+                                             CTCP
+
+
+
+
+                                                            Reno
+
+
+
+
+                                                                                                              Reno
+
+
+
+
+                                                                                                                                    The authors would like to thank Prof. Goto and Prof.
+  Fig. 13: Throughput of each flow without/with reverse traffic                                                                   Kameyama, Waseda University, Japan, for their help in setting
+                                                                                                                                  up the actual network experiments.
+verify the effect of reverse traffic.
+   Fig. 13 shows the throughput of each flow without/with                                                                                                       REFERENCES
+reverse traffic at left and right side. Reno1 (2 and 3) and                                                                       [1]  W. Richard Stevens: "TCP Slow Start, Congestion Avoidance, Fast
+Variant1 (2 and 3) represent TCP-Reno and TCP variant flows                                                                            Retransmit, and Fast Recovery Algorithms," IETF RFC 2581, 1997.
+with one (two and three) hop counts, respectively. The total                                                                      [2] Janey C, Hoe: “Improving the Start-up Behavior of a Congestion Control
+                                                                                                                                       Scheme for TCP,” In Proc. of ACM SIGCOMM 1996, August 1996.
+throughput means the link utilization of R3-R4, which is the                                                                      [3] S.Floyd: “Highspeed TCP for Large Congestion Window”, IETF
+shared link of all forward path flows. Further, to visualize the                                                                       RFC3649, 2003.
+fairness among different hop counts or different RTT flows,                                                                       [4] Tom Kelly: “Scalable TCP: Improving Performance in High-speed Wide
+                                                                                                                                       Area Networks.” In PFLDnet 2003.
+their throughputs are divided into each hop counts flows in this                                                                  [5] C. Casetti, M. Gerla, S. Mascolo, M. Y. Sanadidi, and R. Wang: "TCP
+figure.                                                                                                                                Westwood: Bandwidth Estimation for Enhanced Transport over Wireless
+                                                                                                                                       Links", In proc. of ACM Mobicom 2001.
+  Whereas all protocols fully utilize the bandwidth in the case                                                                   [6] R. Wang, M. Valla, M.Y. Sanadidi, B. K. F. Ng, and M. Gerla:
+without reverse traffic, those of the case with reverse traffic are                                                                    "Efficiency/Friendliness Tradeoffs in TCP Westwood", Seventh IEEE
+underutilized. This is because TCP flows experience the                                                                                Symposium on Computers and Communications, 2002.
+number of timeout or retransmission in the presence of the                                                                        [7] L.S. Brakmo and L.L. Perterson: “TCP Vegas: End-to-End Congestion
+                                                                                                                                       Avoidance on a Global Internet,” IEEE Journal on Selected Areas in
+reverse traffic [15]. TCP-Fusion, ARENO and CTCP can also                                                                              Communication, Vol. 13, Nov. 8, 1995.
+perform friendly to TCP-Reno even in multi-bottleneck links                                                                       [8] Cheng Jin, David X. Wei and Steven H. Low: “FAST TCP: motivation,
+with/without reverse traffic.                                                                                                          architecture, algorithms, performance”, In proc. of INFOCOM 2004.
+                                                                                                                                  [9] H. Shimonishi, T. Hama and T. Murase: “TCP-Adaptive Reno for
+   We then point out another observation that is the fairness                                                                          Improving Efficiency-Friendliness Tradeoffs of TCP Congestion Control
+among different hop counts flows or different RTT flows                                                                                Algorithm”, In proc. of PFLDnet 2006.
+                                                                                                                                  [10] H. Shimonishi, M. Y. Sanadidi, and M. Gerla: “Improving Efficiency-
+with/without reverse traffic. While their fairness among                                                                               Friendliness Tradeoffs of TCP in Wired-Wireless Combined Networks”,
+different RTT flows are not very enough in the absence of                                                                              In proc. of ICC, 2005.
+reverse traffic, those of the cases in the presence of the reverse                                                                [11] K. Tokuda, G. Hasegawa and M. Murata: “Performance analysis of
+                                                                                                                                       HighSpeed TCP and its improvement for high throughput and fairness
+traffic are comparatively favorable. Especially the flows with                                                                         against TCP Reno connections”, in Proc. of HSN 2003.
+two hop counts get larger throughputs in return for reduction of                                                                  [12] R. King, R. Baraniuk and R. Riedi: “TCP-Africa: An Adaptive and Fair
+one hop counts flow throughputs. We suppose that the flows                                                                             Rapid Increase Rule for Scalable TCP”, In Proc. of INFOCOM 2005.
+                                                                                                                                  [13] K. Tan. J. Song, Q. Zhang, and M. Sridharan: “Compound TCP: A
+having the most bandwidth share come under the more                                                                                    Scalable and TCP-Friendly Congestion Control for High-speed
+influence of the cross traffic such as reverse traffic, which                                                                          Networks”, in Proc of PFLDnet 2006.
+results in improving the fairness. We will carry out further                                                                      [14] L. Xu, K. Harfoush and I. Rhee: “Binary Increase Congestion Control for
+investigation of this problem as future works.                                                                                         Fast, Long Distance Networks”, in Proc of INFOCOM 2004.
+                                                                                                                                  [15] S. Mascolo and F. Vacirca: “The effect of reverse traffic on the
+                                                                                                                                       performance of new TCP congestion control algorithms”, in Proc of
+                                                        IV. CONCLUSION                                                                 PFLDnet 2006.
+                                                                                                                                  [16] I. Rhee and L. Xu: “CUBIC: A New TCP-Friendly High-speed TCP
+   In this paper, we present a new hybrid congestion control                                                                           Variant”, in Proc of PFLDnet 2005.
+algorithm, called TCP-Fusion. This protocol integrates three                                                                      [17] K. Kaneko and J. Katto: “Reno Friendly TCP Westwood based on Router
+characteristics; TCP-Reno, TCP-Vegas and TCP-Westwood,                                                                                 Buffer Estimation”, in Proc of ICAS/ICNS 2005.
+                                                                                                                                  [18] “ns-2 network simulator(ver.2),” http://www.mash.cs.berkley.edu/ns.
+which provides good balance between efficiency and                                                                                [19] “Iperf”, http://dast.nlanr.net/Projects/Iperf/
+

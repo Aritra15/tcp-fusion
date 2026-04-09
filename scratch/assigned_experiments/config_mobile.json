@@ -1,0 +1,25 @@
+{
+  "simTime": 60,
+  "seeds": [1, 2, 3],
+  "variants": [
+    "ns3::TcpFusion"
+  ],
+  "baseline": {
+    "nNodes": 60,
+    "nFlows": 30,
+    "pktPerSec": 300,
+    "speed": 15
+  },
+  "sweeps": {
+    "nNodes": [20, 40, 60, 80, 100],
+    "nFlows": [10, 20, 30, 40, 50],
+    "pktPerSec": [100, 200, 300, 400, 500],
+    "speed": [5, 10, 15, 20, 25]
+  },
+  "scenarioScripts": {
+    "wifi-mobile": "assigned_experiments/tcp-fusion-wifi-mobile",
+    "lrwpan-mobile": "assigned_experiments/tcp-fusion-lrwpan-mobile"
+  },
+  "outputCsv": "scratch/assigned_experiments/results/mobile_raw_results.csv",
+  "outputPlotsDir": "scratch/assigned_experiments/results/plots"
+}
